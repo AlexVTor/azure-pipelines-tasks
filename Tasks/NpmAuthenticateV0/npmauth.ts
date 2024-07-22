@@ -60,11 +60,26 @@ async function main(): Promise<void> {
     }
 
     let endpointRegistries: npmregistry.INpmRegistry[] = [];
-    let endpointIds = tl.getDelimitedInput(constants.NpmAuthenticateTaskInput.CustomEndpoint, ',');
-    if (endpointIds && endpointIds.length > 0) {
-        await Promise.all(endpointIds.map(async e => {
-            endpointRegistries.push(await npmregistry.NpmRegistry.FromServiceEndpoint(e, true));
-        }));
+    // todo - look here for how to change to handle only one service connection
+
+    // check for entra service connection input
+    var isEntra = false;
+    if (isEntra) {
+        var endpointIds = [];
+        if(endpointIds && endpointIds.length > 1) {
+            //tl.setResult(tl.TaskResult.Warning, 'MultipleServiceConnections');
+            tl.setResult(tl.TaskResult.SucceededWithIssues, 'MultipleServiceConnections');
+            return;
+        }
+    }
+    else{
+        let endpointIds = tl.getDelimitedInput(constants.NpmAuthenticateTaskInput.CustomEndpoint, ',');
+
+        if (endpointIds && endpointIds.length > 0) {
+            await Promise.all(endpointIds.map(async e => {
+                endpointRegistries.push(await npmregistry.NpmRegistry.FromServiceEndpoint(e, true));
+            }));
+        }
     }
 
     let packagingLocation: pkgLocationUtils.PackagingLocation;
